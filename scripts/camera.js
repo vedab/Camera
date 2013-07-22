@@ -83,6 +83,8 @@
 		
 		transPeriod			: 1500,	//lenght of the sliding effect in milliseconds
 		
+		checkVisibility		: true, //if 'checkVisibility' is set to true then pause and play the camera app.
+		
 ////////callbacks
 
 		onEndTransition		: function() {  },	//this callback is invoked when the transition effect ends
@@ -97,7 +99,8 @@
 	
 	
 	function isMobile() {
-		if( navigator.userAgent.match(/Android/i) ||
+		if( navigator.userAgent.match(/Mobile/i) ||// To support Mozilla OS and any future Mobile browsers
+			navigator.userAgent.match(/Android/i) ||
 			navigator.userAgent.match(/webOS/i) ||
 			navigator.userAgent.match(/iPad/i) ||
 			navigator.userAgent.match(/iPhone/i) ||
@@ -2236,8 +2239,32 @@
 
 				}
 		
-		
-	
+		//if 'checkVisibility' is set to true then pause and play the camera app.
+		if(opts.checkVisibility !== false){
+			//Use Page visiblity to Pause and Resume the play
+			var pgOpts = null;
+			
+			if(typeof document.hidden !== 'undefined'){
+				pgOpts = {e:'visibilitychange', v:'hidden', s:'visibilityState'};
+			}else{
+				var browserPrefix = ['webkit','moz','ms','o'];
+				$.each(browserPrefix, function(i,o){
+					if(typeof document[o+'Hidden'] !== 'undefined'){
+						pgOpts = {e:o+'visibilitychange', v:o+'Hidden', s:o+'VisibilityState'};
+					}
+				});
+			}
+			if(pgOpts !== null){
+				//if the browser supports visibility API.
+				$(document).on(pgOpts.e, function(){
+					if(document[pgOpts.v] === false || document[pgOpts.s] == 'visible'){
+						wrap.cameraResume();
+					}else{
+						wrap.cameraPause();
+					}
+				}, false);
+			}//pgEvnt !== null
+		}//if Page Visibility is to be checked	
 }
 
 })(jQuery);
